@@ -1,0 +1,19 @@
+{
+  "name": "hello-world-node",
+  "version": "0.1.0",
+  "description": "A simple MCP server that returns the current time",
+  "type": "module",
+  "main": "server/index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev:reload": "./dev-reload.sh",
+    "mcp:add": "claude mcp add --transport stdio hello-world-node -- node $(pwd)/server/index.js",
+    "mcp:remove": "claude mcp remove hello-world-node",
+    "mcp:list": "claude mcp list",
+    "mcp:status": "claude mcp get hello-world-node"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}
