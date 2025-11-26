@@ -7,6 +7,17 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
+import registry from "./registry.js";
+import config from "./config.js";
+
+/**
+ * MCP Server - главный файл
+ *
+ * Этот файл содержит только инициализацию сервера и маршрутизацию запросов.
+ * Все инструменты автоматически загружаются из директории tools/ через registry.
+ */
+
+// Инициализация сервера
 const server = new Server(
   {
     name: "hello-world-node",
@@ -19,52 +30,41 @@ const server = new Server(
   },
 );
 
-// Handle tool listing
-server.setRequestHandler(ListToolsRequestSchema, async (request) => {
+// Загрузка конфигурации и инструментов
+config.log();
+await registry.loadTools();
+
+// Handle tool listing - возвращаем все зарегистрированные инструменты
+server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [
-      {
-        name: "get_current_time",
-        description: "Get the current computer time",
-        inputSchema: {
-          type: "object",
-          properties: {},
-        },
-      },
-    ],
+    tools: registry.getToolsList(),
   };
 });
 
-// Handle tool execution
+// Handle tool execution - делегируем выполнение в registry
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name === "get_current_time") {
-    const now = new Date();
-    const timeString = now.toLocaleString("ru-RU", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZoneName: "short",
-    });
-
+  try {
+    return await registry.executeTool(
+      request.params.name,
+      request.params.arguments || {},
+      config
+    );
+  } catch (error) {
+    // Форматируем ошибку для MCP клиента
     return {
       content: [
         {
           type: "text",
-          text: `The current time is: ${timeString}`,
+          text: `Error: ${error.message}`,
         },
       ],
+      isError: true,
     };
   }
-
-  throw new Error(`Unknown tool: ${request.params.name}`);
 });
 
-// Start the server
+// Запуск сервера
 const transport = new StdioServerTransport();
-server.connect(transport);
+await server.connect(transport);
 
-console.error("Hello World MCP server running...");
+console.error("MCP Server running with tools:", registry.getToolsList().map(t => t.name).join(", "));

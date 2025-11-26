@@ -40,7 +40,19 @@
   "tools": [
     {
       "name": "get_current_time",
-      "description": "Get the current computer time in various formats"
+      "description": "Get the current computer time"
+    },
+    {
+      "name": "kaiten_get_card",
+      "description": "Get detailed information about a Kaiten card by ID"
+    },
+    {
+      "name": "kaiten_list_cards",
+      "description": "List cards in Kaiten space with optional filters"
+    },
+    {
+      "name": "kaiten_update_card",
+      "description": "Update a Kaiten card with new data"
     }
   ],
   "keywords": [
@@ -99,7 +111,11 @@
   },
   "compatibility": {
     "claude_desktop": ">=0.10.0",
-    "platforms": ["darwin", "win32", "linux"],
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
     "runtimes": {
       "node": ">=16.0.0"
     }
